@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ristorante il Nuovo Veneto | Cucina Italiana en Valladolid</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  
+  <!-- React & Babel -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            veneto: {
+              DEFAULT: '#367588',
+              dark: '#2a5b6a',
+              light: '#4d8da1',
+              50: '#f0f7f9',
+            },
+            stone: {
+              50: '#fafaf9',
+              100: '#f5f5f4',
+              200: '#e7e5e4',
+              300: '#d6d3d1',
+              400: '#a8a29e',
+              500: '#78716c',
+              600: '#57534e',
+              700: '#44403c',
+              800: '#292524',
+              900: '#1c1917',
+            }
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Manrope"', 'sans-serif'],
+          },
+          backgroundImage: {
+            'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            'slow-pan': 'pan 30s linear infinite alternate',
+            'scale-in': 'scaleIn 0.5s ease-out forwards',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            pan: {
+              '0%': { transform: 'scale(1.1) translate(0%, 0%)' },
+              '100%': { transform: 'scale(1.1) translate(-2%, -2%)' },
+            },
+            scaleIn: {
+              '0%': { opacity: '0', transform: 'scale(0.95)' },
+              '100%': { opacity: '1', transform: 'scale(1)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Custom Styles -->
+  <style>
+    /* Global Smooth Scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Scroll Margin for sections to clear fixed header - INCREASED to ensure visibility */
+    section {
+      scroll-margin-top: 120px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #367588; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Reveal Animations */
+    .reveal { opacity: 0; transform: translateY(40px); transition: all 1s cubic-bezier(0.5, 0, 0, 1); }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+    .delay-100 { transition-delay: 0.1s; }
+    .delay-200 { transition-delay: 0.2s; }
+    .delay-300 { transition-delay: 0.3s; }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/"
+  }
+}
+</script>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased selection:bg-veneto selection:text-white overflow-x-hidden">
+  
+  <div id="root"></div>
+
+  <!-- Main Application Script -->
+  <script type="text/babel" data-type="module">
+    // Explicit imports to avoid conflicts and ensure loading
+    import React, { useState, useEffect } from "https://esm.sh/react@18.2.0";
+    import ReactDOM from "https://esm.sh/react-dom@18.2.0/client";
+    import { 
+      Menu, X, Star, Phone, Quote, ChevronDown, MapPin, 
+      Clock, Info, CreditCard, ArrowRight, 
+      Instagram, Facebook, Camera, Utensils, Award 
+    } from "https://esm.sh/lucide-react@0.292.0?bundle";
+
+    // --- DATA ---
+
+    const menuData = [
+      {
+        title: 'Antipasti',
+        items: [
+          { id: 'a1', name: 'Bresaola italiana', description: 'Con AOVE, pimienta y parmesano. Fiambre de Ternera del valle de Valtellina, región de Lombardía.', price: '16,00' },
+          { id: 'a2', name: 'Provolone italiano', description: 'Tomate y orégano al horno.', price: '12,50' },
+          { id: 'a3', name: 'Gambones al Ajillo', price: '16,50' },
+          { id: 'a4', name: 'Gambones Thay', description: 'Con arroz jazmín y salsa de ostras.', price: '18,50' },
+          { id: 'a5', name: 'Carpaccio de Langostino Austral', description: 'Con pimienta blanca.', price: '15,00' },
+          { id: 'a6', name: 'Tataki de Atún Rojo', description: 'Calabacín, salsa miel y mostaza.', price: '18,50' },
+          { id: 'a7', name: 'Mollejas de Lechazo', description: 'Salteadas al ajillo.', price: '24,00' },
+          { id: 'a8', name: 'Manillas de Lechazo', description: 'A nuestra manera.', price: '14,00' },
+          { id: 'a9', name: 'Espárragos trigueros', description: 'A la plancha con aceite de trufa y almendra tostada.', price: '14,50' },
+          { id: 'pan1', name: 'Pan de Ajo', price: '1,50' },
+          { id: 'pan2', name: 'Panecillo', price: '1,00' },
+          { id: 'pan3', name: 'Pan sin Gluten', price: '2,00' }
+        ]
+      },
+      {
+        title: 'Ensaladas',
+        items: [
+          { id: 'e1', name: 'Ensalada de Pollo asado', description: 'Salsa rosa, huevo, espárrago y aceituna negra.', price: '14,00' },
+          { id: 'e2', name: 'Ensalada de Atún', description: 'Salsa miel y mostaza, almendra y parmesano.', price: '14,00' },
+          { id: 'e3', name: 'Caprese', description: 'Mozzarella de Búfala, tomate semi seco y pesto.', price: '14,00' }
+        ]
+      },
+      {
+        title: 'Pastas',
+        items: [
+          { id: 'p1', name: 'Napolitana', description: 'Con tomate Casero.', price: '13,00' },
+          { id: 'p2', name: 'Boloñesa', price: '14,50' },
+          { id: 'p3', name: 'Amatriciana', description: 'Tomate, Guanciale, vino Blanco y Guindilla.', price: '14,50' },
+          { id: 'p4', name: 'Carbonara con Nata', price: '14,50' },
+          { id: 'p5', name: 'Carbonara Originale', description: 'Con Yema de huevo, la receta auténtica.', price: '15,50' },
+          { id: 'p6', name: 'Ajo y Gambas', description: 'Con nata.', price: '15,50' },
+          { id: 'p7', name: 'Espaguetis Vongole', description: 'Con Almejas.', price: '19,00' },
+          { id: 'p8', name: 'Pesto de albahaca', price: '15,50' },
+          { id: 'p9', name: 'Putanesca', description: 'Tomate, Anchoas, aceituna, alcaparras y guindilla.', price: '14,50' },
+          { id: 'p10', name: 'Alfredo', description: 'Mantequilla, parmesano y pimienta.', price: '15,50' },
+          { id: 'p11', name: 'Penne Rigate Gratinados', price: '14,50' },
+          { id: 'p12', name: 'Lasaña especial Veneto’s', description: 'Carne y espinacas.', price: '15,50' },
+          { id: 'p13', name: 'Lasaña de carne', description: 'Boloñesa.', price: '15,50' }
+        ]
+      },
+      {
+        title: 'Carnes',
+        items: [
+          { id: 'c1', name: 'Plato especial Veneto’s', description: 'Solomillo de cerdo con salsa de champiñón.', price: '15,50' },
+          { id: 'c2', name: 'Escalopines Gratinados', description: 'Solomillo de cerdo gratinado con edam y parmesano.', price: '15,50' },
+          { id: 'c3', name: 'Escalope a la Parmesana', description: 'Lomo con tomate, edam, mozzarella y parmesano al horno.', price: '15,00' },
+          { id: 'c4', name: 'Escalope Milanesa', description: 'Empanado.', price: '15,00' },
+          { id: 'c5', name: 'Ossobuco a la milanesa', price: '18,50' },
+          { id: 'c6', name: 'Solomillo de ternera', description: '270 Gr Aprox.', price: '27,00' },
+          { id: 'c7', name: 'Bistec de Ternera', description: '220 Gr Aprox.', price: '15,00' },
+          { id: 'c8', name: 'Entrecot de Ternera', description: '350 Gr Aprox.', price: '23,00' },
+          { id: 'c9', name: 'Chuletón de Ternera', description: '750 Gr Aprox.', price: '46,00' }
+        ]
+      },
+      {
+        title: 'Pizzas Clásicas',
+        items: [
+          { id: 'pz1', name: 'Margarita', description: 'Tomate, Mozzarella y orégano.', price: '12,50' },
+          { id: 'pz2', name: 'Reina', description: 'Tomate, Mozzarella, York y orégano.', price: '13,50' },
+          { id: 'pz3', name: 'Vegetal', description: 'Tomate, Mozzarella, pimiento, Champiñón, cebolla, aceituna negra y orégano.', price: '14,00' },
+          { id: 'pz4', name: 'Caprichosa', description: 'Tomate, Mozzarella, york, espárragos, pimientos y orégano.', price: '14,00' },
+          { id: 'pz5', name: 'Prosciutto', description: 'Tomate, Mozzarella, jamón Ibérico el Coto Ramos.', price: '15,00' },
+          { id: 'pz6', name: 'Diavola', description: 'Tomate, Mozzarella y pepperoni picante.', price: '14,00' },
+          { id: 'pz7', name: 'Primavera', description: 'Tomate, Mozzarella, cebolla y orégano.', price: '13,00' },
+          { id: 'pz8', name: 'Siciliana', description: 'Tomate, Mozzarella, Cebolla, Guanciale y orégano.', price: '14,00' },
+          { id: 'pz9', name: 'Cuatro Estaciones', description: 'Tomate, Mozzarella, Champiñón, Anchoa, Esparrago, York, Pimiento y orégano.', price: '14,00' },
+          { id: 'pz10', name: 'Napolitana', description: 'Tomate, Mozzarella, Alcaparras, Anchoas y Orégano.', price: '14,50' },
+          { id: 'pz11', name: 'Especial Veneto’s', description: 'Tomate, Mozzarella, Champiñón, Guanciale, Carne Picada, Huevo y orégano.', price: '14,50' },
+          { id: 'pz12', name: 'Marinera', description: 'Tomate, Mozzarella, gambas y Orégano.', price: '15,00' },
+          { id: 'pz13', name: 'Frutti di Mare', description: 'Tomate, Mozzarella, Atún, Gambas, Anchoas y orégano.', price: '15,00' },
+          { id: 'pz14', name: 'Neptuna', description: 'Tomate, Mozzarella, atún, Pimiento y orégano.', price: '14,00' },
+          { id: 'pz15', name: 'Tropical', description: 'Tomate, Mozzarella, York, Piña y Orégano.', price: '14,00' },
+          { id: 'pz16', name: '4 Quesos', description: 'Tomate, Mozzarella, Variedad de quesos y orégano.', price: '14,00' },
+          { id: 'pz17', name: 'Trufada', description: 'Mortadela De bolonia Trufada, Aceite de Trufa y pesto.', price: '15,00' },
+          { id: 'pz18', name: 'Al gusto', description: 'Tomate, Mozzarella y un máximo de 3 ingredientes (Atún, gambas, anchoas, cebolla, pimiento, champiñón, aceitunas negras, espárragos, alcaparras, piña, Pepperoni, Guanciale, york, picada y huevo).', price: '15,00' }
+        ]
+      },
+      {
+        title: 'Pizzas de Campeonato',
+        items: [
+          {
+            id: 'pch1',
+            name: 'Pizza Churra',
+            description: 'Tomate, Mozzarella, Lechazo Asado y crema de lechazo.',
+            price: '17,50',
+            highlight: true,
+            badges: ['Campeonato de España 2023', '3ª Mejor Pizza de CyL']
+          },
+          {
+            id: 'pch2',
+            name: 'Pizza Thay',
+            description: 'Salsa de Ostras, Mozzarella, Gambas, Puerro salteado con Ajo y aceite de sésamo, 3 tipos de sésamo tostado.',
+            price: '17,00',
+            highlight: true,
+            badges: ['Participante Campeonato de España 2024']
+          }
+        ]
+      }
+    ];
+
+    const galleryPlatos = [
+      "https://images.unsplash.com/photo-1595295333158-4742f28fbd85?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1579751626657-72bc17010498?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1626844131082-256783844137?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1551024601-562963525c5c?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?q=80&w=800&auto=format&fit=crop"
+    ];
+
+    const galleryAmbiente = [
+       "images/portada1.jpg",
+  "images/portada1.jpg",
+  "images/portada1.jpg",
+  "images/portada1.jpg",
+  "images/portada1.jpg",
+  "images/portada1.jpg",
+  "images/portada1.jpg",
+  "images/portada1.jpg"
+    ];
+
+    // --- UTILS ---
+    const smoothScrollTo = (id) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        
+        // Usamos la función nativa que respeta el scroll-behavior del CSS
+        // y el scroll-margin-top definido en el estilo global.
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // --- COMPONENTS ---
+
+    const ReservationModal = ({ isOpen, onClose }) => {
+      if (!isOpen) return null;
+      return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+          <div className="relative bg-white rounded-sm shadow-2xl p-8 max-w-md w-full animate-fade-in-up text-center border-t-4 border-veneto">
+             <button onClick={onClose} className="absolute top-4 right-4 text-stone-400 hover:text-stone-800 transition-colors"><X size={24} /></button>
+             <h3 className="font-serif text-3xl mb-4 text-stone-900">Reservar Mesa</h3>
+             <div className="w-16 h-1 bg-veneto mx-auto mb-6"></div>
+             <p className="text-stone-600 mb-8 font-sans leading-relaxed">
+               Para realizar tu reserva, por favor contáctanos telefónicamente en nuestro horario de apertura.
+             </p>
+             <a href="tel:983268337" className="block w-full bg-veneto text-white font-bold py-4 rounded-sm text-xl hover:bg-veneto-dark transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 mb-6 flex items-center justify-center gap-3">
+                <Phone size={24} /> 983 26 83 37
+             </a>
+             <div className="text-xs text-stone-400 border-t border-stone-100 pt-4">
+               <p>Recomendamos reservar con antelación,</p>
+               <p>especialmente para fines de semana.</p>
+             </div>
+          </div>
+        </div>
+      );
+    }
+
+    const Header = ({ onOpenReservation }) => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [scrolled, setScrolled] = useState(false);
+
+      useEffect(() => {
+        const handleScroll = () => {
+          setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const scrollToSection = (id) => {
+        setIsOpen(false);
+        smoothScrollTo(id);
+      };
+
+      const navLinks = [
+        { name: 'Inicio', id: 'hero' },
+        { name: 'Historia', id: 'about' },
+        { name: 'Carta', id: 'menu' },
+        { name: 'Galería', id: 'gallery' },
+        { name: 'Reseñas', id: 'reviews' },
+        { name: 'Info', id: 'info' },
+      ];
+
+      return (
+        <React.Fragment>
+          <header 
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
+              scrolled || isOpen ? 'bg-white py-4 shadow-sm text-stone-800' : 'bg-transparent py-6 text-white'
+            }`}
+          >
+            <div className="container mx-auto px-6 flex justify-between items-center">
+              <div 
+                onClick={() => scrollToSection('hero')} 
+                className="cursor-pointer z-50 group"
+              >
+                <h1 className={`font-serif font-bold transition-all duration-300 leading-tight ${
+                  scrolled || isOpen ? 'text-veneto text-xl md:text-2xl' : 'text-white text-2xl md:text-3xl'
+                }`}>
+                  Il Nuovo Veneto’s
+                </h1>
+                <span className={`block text-[10px] uppercase tracking-[0.3em] font-sans ${
+                  scrolled || isOpen ? 'text-veneto/60' : 'text-white/70'
+                }`}>Ristorante</span>
+              </div>
+
+              <nav className="hidden lg:flex items-center space-x-10">
+                {navLinks.map((link) => (
+                  <button
+                    key={link.name}
+                    onClick={() => scrollToSection(link.id)}
+                    className={`font-sans text-xs font-bold uppercase tracking-widest transition-colors hover:text-veneto relative after:content-[''] after:absolute after:-bottom-2 after:left-0 after:w-0 after:h-px after:bg-veneto after:transition-all hover:after:w-full ${
+                        scrolled ? 'text-stone-600' : 'text-white/90 hover:text-white after:bg-white'
+                    }`}
+                  >
+                    {link.name}
+                  </button>
+                ))}
+                <button
+                  onClick={onOpenReservation}
+                  className={`px-6 py-2 text-xs font-bold uppercase tracking-widest border transition-colors ${
+                      scrolled 
+                      ? 'border-veneto text-veneto hover:bg-veneto hover:text-white' 
+                      : 'border-white text-white hover:bg-white hover:text-veneto'
+                  }`}
+                >
+                  Reservar
+                </button>
+              </nav>
+
+              <button 
+                className={`lg:hidden p-2 z-50 transition-colors ${scrolled || isOpen ? 'text-stone-800' : 'text-white'}`}
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X size={32} strokeWidth={1} /> : <Menu size={32} strokeWidth={1} />}
+              </button>
+            </div>
+          </header>
+
+          <div className={`fixed inset-0 bg-white z-40 transition-transform duration-500 ease-in-out lg:hidden flex flex-col justify-center items-center space-y-8 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            {navLinks.map((link) => (
+              <button
+                key={link.name}
+                onClick={() => scrollToSection(link.id)}
+                className="text-stone-900 hover:text-veneto font-serif text-4xl italic transition-colors"
+              >
+                {link.name}
+              </button>
+            ))}
+            <button
+               onClick={() => { setIsOpen(false); onOpenReservation(); }}
+               className="mt-8 text-veneto font-sans text-sm font-bold uppercase tracking-widest border-b border-veneto pb-1"
+            >
+              Reservar Mesa
+            </button>
+          </div>
+        </React.Fragment>
+      );
+    };
+
+    const Hero = ({ onOpenReservation }) => {
+      return (
+        <section id="hero" className="relative h-screen flex items-center justify-center overflow-hidden bg-stone-900">
+          <div className="absolute inset-0 z-0">
+            <div 
+              className="w-full h-full bg-cover bg-center animate-slow-pan"
+             style={{ backgroundImage: 'url("images/portada1.jpg")' }}
+            ></div>
+            <div className="absolute inset-0 bg-stone-900/40 mix-blend-multiply"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/10 to-stone-900/30 opacity-90"></div>
+          </div>
+
+          <div className="container mx-auto px-4 text-center z-10 relative mt-16">
+            <div className="animate-fade-in-up">
+              <span className="inline-block py-1 px-3 border border-white/30 rounded-full text-white/90 uppercase tracking-[0.3em] text-xs font-medium mb-6 backdrop-blur-sm">
+                Valladolid, España
+              </span>
+              
+              <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white mb-6 leading-none drop-shadow-lg">
+                Ristorante <br/>
+                <span className="italic text-white font-normal relative">
+                  il Nuovo Veneto’s
+                </span>
+              </h1>
+              
+              <div className="h-px w-24 bg-white/50 mx-auto my-8"></div>
+
+              <p className="text-white text-lg md:text-xl max-w-xl mx-auto mb-10 font-normal leading-relaxed font-sans tracking-wide drop-shadow-md">
+                Donde la tradición italiana encuentra la elegancia. <br className="hidden md:block"/>
+                Masas caseras, ingredientes nobles y pasión en cada plato.
+              </p>
+
+              <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
+                <button 
+                  onClick={() => smoothScrollTo('menu')}
+                  className="group relative px-8 py-3 bg-white text-stone-900 font-sans text-sm font-bold uppercase tracking-widest hover:bg-veneto hover:text-white transition-all duration-500 overflow-hidden shadow-lg"
+                >
+                  <span className="relative z-10">Ver la Carta</span>
+                </button>
+                <button
+                  onClick={onOpenReservation}
+                  className="group px-8 py-3 border border-white/40 text-white font-sans text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-all duration-300 backdrop-blur-sm flex items-center gap-2"
+                >
+                  <Phone size={16} className="text-white"/> Reservar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-10 animate-bounce duration-[2000ms] opacity-50">
+            <ChevronDown className="text-white" size={32} strokeWidth={2} />
+          </div>
+          
+          <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/20 backdrop-blur-md py-4 hidden md:block z-10">
+            <div className="container mx-auto px-6 flex justify-center items-center text-white/90 text-xs tracking-wider uppercase font-medium">
+              <div className="flex items-center gap-2">
+                <MapPin size={14} className="text-veneto-light"/> C. de Gondomar, 12, Valladolid
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const About = () => {
+      return (
+        <section id="about" className="py-32 bg-[#367588] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 -skew-x-12 transform translate-x-20 z-0"></div>
+
+          <div className="container mx-auto px-6 md:px-12 relative z-10">
+            <div className="flex flex-col lg:flex-row items-center gap-20">
+              
+              <div className="w-full lg:w-1/2 relative reveal">
+                 <div className="relative z-10 group">
+                   <img 
+                     src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=2832&auto=format&fit=crop" 
+                     alt="Chef preparando pasta" 
+                     className="w-full h-[600px] object-cover object-center shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+                   />
+                 </div>
+                 <div className="absolute top-10 -left-10 w-full h-full border-2 border-white/20 -z-10"></div>
+              </div>
+
+              <div className="w-full lg:w-1/2 space-y-8 reveal delay-100">
+                <h4 className="text-white/80 text-xs font-bold uppercase tracking-[0.3em] mb-2">Nuestra Historia</h4>
+                <h2 className="font-serif text-5xl md:text-6xl text-white leading-tight">
+                  Pasión por la <br/>
+                  <span className="text-white/90 italic">vera cucina</span>
+                </h2>
+                
+                <div className="w-20 h-1 bg-white mb-8"></div>
+                
+                <div className="text-white font-sans text-lg leading-relaxed space-y-6">
+                  <p className="opacity-95">
+                    Ubicados en el corazón de Valladolid, <strong>Il Nuovo Veneto’s</strong> no es solo un restaurante, es un homenaje a la autenticidad. Nos alejamos de lo convencional para centrarnos en lo que realmente importa: el producto.
+                  </p>
+                  <p className="opacity-95">
+                    Cada mañana elaboramos nuestras masas de forma artesanal. Nuestras pizzas, premiadas en campeonatos nacionales, y nuestras pastas frescas, son el resultado de años de perfeccionamiento y respeto por la tradición culinaria italiana.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const Gallery = () => {
+      const [activeTab, setActiveTab] = useState('platos');
+      const images = activeTab === 'platos' ? galleryPlatos : galleryAmbiente;
+
+      return (
+        <section id="gallery" className="py-32 bg-stone-900 text-stone-100 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-stone-800 pb-8 reveal">
+               <div className="space-y-4">
+                  <span className="flex items-center gap-2 text-veneto uppercase tracking-[0.3em] text-xs font-bold">
+                    <Camera size={14} />
+                    La Experiencia Visual
+                  </span>
+                  <h2 className="font-serif text-4xl md:text-5xl text-white leading-tight">
+                    Instantes <span className="italic text-stone-500 font-light">inolvidables</span>
+                  </h2>
+               </div>
+               <p className="text-stone-400 font-normal max-w-sm text-sm leading-relaxed text-right md:text-left">
+                  En Il Nuovo Veneto, cada plato es una obra de arte y cada rincón cuenta una historia. Descubre la esencia de nuestra cocina.
+               </p>
+            </div>
+
+            <div className="flex justify-center gap-12 mb-16 reveal">
+              <button 
+                onClick={() => setActiveTab('platos')}
+                className={`text-xl font-serif italic pb-3 border-b-2 transition-all duration-300 px-4 ${activeTab === 'platos' ? 'border-veneto text-white' : 'border-transparent text-stone-600 hover:text-stone-400'}`}
+              >
+                Nuestros Platos
+              </button>
+              <button 
+                onClick={() => setActiveTab('ambiente')}
+                className={`text-xl font-serif italic pb-3 border-b-2 transition-all duration-300 px-4 ${activeTab === 'ambiente' ? 'border-veneto text-white' : 'border-transparent text-stone-600 hover:text-stone-400'}`}
+              >
+                El Ambiente
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in-up">
+               {images.map((src, index) => (
+                  <div key={index} className="aspect-square relative overflow-hidden rounded-sm cursor-pointer group">
+                     <img 
+                       src={src} 
+                       alt="Galería del restaurante" 
+                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                       loading="lazy"
+                     />
+                     <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-veneto/20 transition-all duration-500"></div>
+                  </div>
+               ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const MenuDisplay = ({ onOpenReservation }) => {
+      const [activeCategory, setActiveCategory] = useState('Pizzas de Campeonato');
+      const selectedCategory = menuData.find(c => c.title === activeCategory) || menuData[0];
+
+      const handleCategoryChange = (title) => {
+        setActiveCategory(title);
+        const contentStart = document.getElementById('menu-content-anchor');
+        if (contentStart) {
+          const offset = 160; 
+          const bodyRect = document.body.getBoundingClientRect().top;
+          const elementRect = contentStart.getBoundingClientRect().top;
+          const elementPosition = elementRect - bodyRect;
+          const offsetPosition = elementPosition - offset;
+          if (window.scrollY > offsetPosition) {
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+          }
+        }
+      };
+
+      return (
+        <section id="menu" className="py-32 bg-white relative">
+          <div className="container mx-auto px-6 max-w-6xl">
+            <div className="text-center mb-16 reveal">
+              <span className="text-veneto uppercase tracking-[0.3em] text-xs font-bold block mb-4">Gastronomía</span>
+              <h2 className="font-serif text-5xl md:text-6xl text-stone-900 mb-6 font-medium">La Carta</h2>
+              <p className="font-sans text-stone-600 font-normal text-lg max-w-md mx-auto">
+                Selecciona una categoría para explorar nuestros platos.
+              </p>
+            </div>
+
+            <div className="mb-20 border-b border-stone-200 sticky top-20 bg-white/95 backdrop-blur z-20 overflow-x-auto no-scrollbar reveal delay-100">
+               <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center min-w-max md:min-w-0 px-4 md:px-0">
+                 {menuData.map((category) => (
+                    <button
+                      key={category.title}
+                      onClick={() => handleCategoryChange(category.title)}
+                      className={`py-4 px-6 md:px-8 font-serif text-lg md:text-xl transition-colors duration-200 border-b-2 whitespace-nowrap ${
+                        activeCategory === category.title
+                          ? 'border-veneto text-veneto italic font-bold'
+                          : 'border-transparent text-stone-500 hover:text-stone-800 font-medium'
+                      }`}
+                    >
+                      {category.title}
+                    </button>
+                 ))}
+               </div>
+            </div>
+
+            <div id="menu-content-anchor" className="h-0 -mt-8 mb-8"></div>
+
+            <div key={activeCategory} className="animate-fade-in-up min-h-[400px]">
+                  <div className={`${
+                    (selectedCategory.title.includes('Pizzas') && !selectedCategory.title.includes('Campeonato')) || selectedCategory.title.includes('Pastas')
+                      ? 'grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12' 
+                      : 'grid grid-cols-1 gap-10 max-w-3xl mx-auto'
+                  }`}>
+                    {selectedCategory.items.map((item) => (
+                      <div 
+                        key={item.id} 
+                        className={`group relative transition-all duration-300 hover:transform hover:translate-x-1 ${
+                            item.highlight 
+                            ? 'md:col-span-2 bg-amber-50/60 p-8 border border-amber-200/50 rounded-lg shadow-sm' 
+                            : ''
+                        }`}
+                      >
+                        <div className="flex items-baseline justify-between mb-2">
+                          <h4 className={`font-serif font-bold text-stone-900 group-hover:text-veneto transition-colors ${item.highlight ? 'text-2xl text-veneto-dark' : 'text-xl'}`}>
+                            {item.name}
+                          </h4>
+                          {!item.highlight && !selectedCategory.title.includes('Pizzas') && !selectedCategory.title.includes('Pastas') ? (
+                             <div className="mx-4 border-b border-dotted border-stone-400 grow h-4 hidden sm:block opacity-40"></div>
+                          ) : (
+                             <div className="grow"></div>
+                          )}
+                          <span className={`font-serif font-bold text-stone-900 ${item.highlight ? 'text-2xl' : 'text-xl ml-4'}`}>{item.price} €</span>
+                        </div>
+                        <div className={`${!item.highlight && !selectedCategory.title.includes('Pizzas') && !selectedCategory.title.includes('Pastas') ? 'sm:pr-16' : ''}`}>
+                          {item.description && (
+                            <p className={`text-stone-600 font-sans leading-relaxed text-[15px] ${item.highlight ? 'mt-2' : ''}`}>
+                              {item.description}
+                            </p>
+                          )}
+                          {item.badges && (
+                            <div className="flex flex-wrap gap-2 mt-4">
+                              {item.badges.map(badge => (
+                                <span key={badge} className="flex items-center gap-1 border border-amber-200 bg-white text-amber-700 text-[11px] uppercase tracking-wider px-3 py-1 font-bold rounded-full shadow-sm">
+                                  <Award size={14} /> {badge}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+            </div>
+            
+            <div className="text-center mt-24 pt-12 border-t border-stone-200 reveal">
+               <p className="text-stone-500 font-serif italic mb-6 text-lg">
+                 "Disponemos de opciones sin gluten y alérgenos. Consulte a nuestro personal."
+               </p>
+               <button
+                 onClick={onOpenReservation}
+                 className="inline-flex items-center gap-2 text-stone-900 font-bold uppercase text-xs tracking-[0.2em] border-b-2 border-veneto pb-2 hover:text-veneto transition-colors"
+               >
+                 <Utensils size={16} /> Reservar mesa
+               </button>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const Reviews = () => {
+      const reviews = [
+        {
+          id: 1,
+          name: "María G.",
+          text: "El trato fue excelente desde que entramos. El ambiente es super tranquilo y la comida se nota que es casera. La tarta de queso es obligatoria.",
+        },
+        {
+          id: 2,
+          name: "Carlos D.",
+          text: "Lo que más destaca es la amabilidad extrema del personal. Te hacen sentir especial. La comida acompaña perfectamente al servicio.",
+        },
+        {
+          id: 3,
+          name: "Elena R.",
+          text: "Un imprescindible para los amantes de la auténtica cocina italiana. Buen lugar, buen ambiente y un precio muy razonable para tal calidad.",
+        }
+      ];
+
+      return (
+        <section id="reviews" className="py-32 bg-stone-900 text-stone-100 relative">
+          <div className="absolute inset-0 bg-noise opacity-10"></div>
+          <div className="container mx-auto px-6 relative z-10">
+            <div className="text-center mb-20 reveal">
+              <Star className="w-8 h-8 text-veneto mx-auto mb-6 fill-veneto" />
+              <h2 className="font-serif text-4xl md:text-5xl text-white mb-6">La Voz de Nuestros Clientes</h2>
+              <p className="text-stone-300 font-normal tracking-wide max-w-lg mx-auto text-lg">
+                La satisfacción de quienes nos visitan es nuestro mayor reconocimiento.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.map((review, index) => (
+                <div key={review.id} className={`group text-center p-8 border border-stone-800 bg-stone-900/50 backdrop-blur-sm rounded-sm reveal delay-${(index + 1) * 100} hover:border-veneto/30 transition-all duration-300`}>
+                  <div className="mb-6 relative inline-block">
+                     <Quote className="text-veneto/40 w-10 h-10 mx-auto" strokeWidth={1} />
+                  </div>
+                  <p className="text-lg font-serif italic text-stone-300 mb-8 leading-relaxed group-hover:text-white transition-colors duration-300">
+                    "{review.text}"
+                  </p>
+                  <div className="flex gap-1 justify-center mb-4">
+                     {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} className="fill-veneto text-veneto" />
+                     ))}
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <span className="font-sans font-bold text-sm tracking-widest uppercase text-white">{review.name}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-20 reveal">
+              <a 
+                href="https://www.google.com/search?q=Ristorante+il+Nuovo+Veneto's+Valladolid+reseñas" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border-b border-stone-600 pb-1 hover:text-veneto hover:border-veneto transition-all text-xs tracking-[0.2em] uppercase text-stone-400 font-bold"
+              >
+                Leer más reseñas en Google
+              </a>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const InfoDisplay = () => {
+      return (
+        <section id="info" className="bg-stone-50 pt-32 pb-20">
+          <div className="container mx-auto px-6 max-w-6xl">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
+                
+                {/* Left Column: Contact & Hours */}
+                <div className="reveal space-y-12">
+                    <div>
+                       <h3 className="font-serif text-3xl text-stone-900 mb-8 border-l-4 border-veneto pl-6 font-medium">Ubicación y Horarios</h3>
+                       
+                       <div className="flex gap-6 mb-10 items-start">
+                         <div className="flex-shrink-0 mt-1">
+                            <MapPin className="text-veneto w-8 h-8" />
+                         </div>
+                         <div>
+                            <p className="text-2xl font-serif text-stone-900 mb-2 font-bold">C. de Gondomar, 12</p>
+                            <p className="text-stone-600 text-lg">47011 Valladolid, España</p>
+                         </div>
+                       </div>
+
+                       <div className="bg-white p-8 shadow-sm border border-stone-200/60 rounded-sm">
+                          <div className="flex items-center gap-3 mb-6">
+                              <Clock className="text-veneto w-5 h-5" />
+                              <span className="font-bold text-stone-900 text-sm uppercase tracking-wide">Horario de Apertura</span>
+                          </div>
+                          <ul className="space-y-4 text-stone-700 font-normal">
+                              <li className="flex justify-between border-b border-stone-100 pb-2">
+                                <span>Lunes</span>
+                                <span className="font-bold">13:30 – 15:30</span>
+                              </li>
+                              <li className="flex justify-between border-b border-stone-100 pb-2">
+                                <span>Martes</span>
+                                <span className="font-bold">13:30 – 15:30</span>
+                              </li>
+                              <li className="flex justify-between border-b border-stone-100 pb-2 text-stone-400">
+                                <span>Miércoles</span>
+                                <span className="italic">Cerrado</span>
+                              </li>
+                              <li className="flex justify-between border-b border-stone-100 pb-2">
+                                <span>Jueves</span>
+                                <span className="font-bold">13:30 – 15:30 / 20:45 – 22:30</span>
+                              </li>
+                              <li className="flex justify-between border-b border-stone-100 pb-2">
+                                <span>Viernes</span>
+                                <span className="font-bold">13:30 – 15:30 / 20:45 – 23:00</span>
+                              </li>
+                              <li className="flex justify-between border-b border-stone-100 pb-2">
+                                <span>Sábado</span>
+                                <span className="font-bold">13:30 – 15:30 / 20:45 – 23:00</span>
+                              </li>
+                              <li className="flex justify-between pt-2">
+                                <span>Domingo</span>
+                                <span className="font-bold">13:30 – 15:30</span>
+                              </li>
+                          </ul>
+                       </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Services & Details */}
+                <div className="reveal delay-200">
+                    <h3 className="font-serif text-3xl text-stone-900 mb-8 border-l-4 border-veneto pl-6 font-medium">Servicios y Detalles</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-12">
+                         <div>
+                           <h4 className="font-bold text-sm uppercase tracking-widest text-stone-900 mb-4">Ambiente</h4>
+                           <p className="text-stone-600 font-normal leading-relaxed">
+                             Un espacio acogedor que combina lo informal con la elegancia. Perfecto para cenas tranquilas, grupos y familias. Disponemos de tronas para los más pequeños.
+                           </p>
+                         </div>
+                         <div>
+                           <h4 className="font-bold text-sm uppercase tracking-widest text-stone-900 mb-4">Accesibilidad</h4>
+                           <p className="text-stone-600 font-normal leading-relaxed">
+                             Comprometidos con todos nuestros clientes, disponemos de acceso, aseo y asientos adaptados para sillas de ruedas.
+                           </p>
+                         </div>
+                         <div>
+                           <h4 className="font-bold text-sm uppercase tracking-widest text-stone-900 mb-4 flex items-center gap-2">
+                             Pagos
+                           </h4>
+                           <div className="text-stone-600 font-normal leading-relaxed flex flex-col gap-3">
+                             <span className="flex items-center gap-3"><CreditCard size={18} className="text-veneto"/> Tarjetas de Crédito / Débito</span>
+                             <span className="flex items-center gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-veneto"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg> NFC / Pago Móvil</span>
+                           </div>
+                         </div>
+                         <div>
+                            <h4 className="font-bold text-sm uppercase tracking-widest text-stone-900 mb-4">Redes Sociales</h4>
+                            <div className="flex gap-4">
+                              <a href="https://www.instagram.com/ristoranteilnuovoveneto/" target="_blank" rel="noopener noreferrer" className="bg-stone-100 p-3 rounded-full text-stone-600 hover:bg-veneto hover:text-white transition-all">
+                                <Instagram size={20} />
+                              </a>
+                              <a href="https://www.facebook.com/p/Ristorante-il-Nuovo-Veneto-100021537020057/?locale=es_ES" target="_blank" rel="noopener noreferrer" className="bg-stone-100 p-3 rounded-full text-stone-600 hover:bg-veneto hover:text-white transition-all">
+                                <Facebook size={20} />
+                              </a>
+                              <a href="tel:983268337" className="bg-stone-100 p-3 rounded-full text-stone-600 hover:bg-veneto hover:text-white transition-all">
+                                <Phone size={20} />
+                              </a>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Map Contained */}
+            <div className="w-full h-[400px] relative rounded-sm overflow-hidden shadow-lg border border-stone-200">
+               <iframe 
+                  src="https://maps.google.com/maps?q=Ristorante+il+Nuovo+Veneto+Valladolid&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+                  width="100%" 
+                  height="100%" 
+                  frameBorder="0" 
+                  style={{border:0}} 
+                  allowFullScreen 
+                  title="Mapa de Ubicación"
+                  className="w-full h-full"
+               ></iframe>
+               <div className="absolute bottom-6 left-6 z-10">
+                  <a 
+                    href="https://www.google.com/maps/dir//Ristorante+il+Nuovo+Veneto's,+C.+de+Gondomar,+12,+47011+Valladolid/@41.6582,-4.7335,15z" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-white text-stone-900 px-6 py-3 font-bold uppercase tracking-widest text-[10px] shadow-xl hover:bg-veneto hover:text-white transition-all flex items-center gap-2 rounded-sm"
+                  >
+                    <MapPin size={14} /> Cómo llegar
+                  </a>
+               </div>
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+    const Footer = () => {
+      return (
+        <footer className="bg-stone-900 text-white pt-20 pb-10 border-t border-stone-800">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+              <div className="lg:col-span-2">
+                <h2 className="font-serif text-3xl mb-6 text-white">Il Nuovo Veneto’s</h2>
+                <p className="text-stone-400 font-light max-w-sm leading-relaxed mb-8">
+                  Auténtica cocina italiana en Valladolid. Pasión por el producto, masas caseras y un ambiente inolvidable.
+                </p>
+              </div>
+              <div>
+                 <h4 className="font-bold text-xs uppercase tracking-widest text-veneto mb-6">Enlaces</h4>
+                 <ul className="space-y-4 text-stone-400 font-light">
+                   <li><button onClick={() => smoothScrollTo('hero')} className="hover:text-white transition-colors">Inicio</button></li>
+                   <li><button onClick={() => smoothScrollTo('menu')} className="hover:text-white transition-colors">La Carta</button></li>
+                   <li><button onClick={() => smoothScrollTo('gallery')} className="hover:text-white transition-colors">Galería</button></li>
+                   <li><button onClick={() => smoothScrollTo('info')} className="hover:text-white transition-colors">Información</button></li>
+                 </ul>
+              </div>
+              <div>
+                <h4 className="font-bold text-xs uppercase tracking-widest text-veneto mb-6">Contacto</h4>
+                <div className="space-y-4 text-stone-400 font-light text-sm">
+                   <p>C. de Gondomar, 12, Valladolid</p>
+                   <p><a href="tel:983268337" className="hover:text-white transition-colors">983 26 83 37</a></p>
+                   <p>reservas@nuovoveneto.com</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row justify-between items-center text-xs text-stone-600 pt-8 border-t border-stone-800">
+              <p>&copy; {new Date().getFullYear()} Ristorante il Nuovo Veneto’s.</p>
+              <div className="mt-4 md:mt-0">
+                <p className="text-stone-500 font-serif italic text-xs tracking-wider">Designed by doxenstudio</p>
+              </div>
+            </div>
+          </div>
+        </footer>
+      );
+    };
+
+    const App = () => {
+      const [isReservationOpen, setIsReservationOpen] = useState(false);
+
+      // Intersection Observer for Scroll Animations
+      useEffect(() => {
+        const observerOptions = {
+          root: null,
+          rootMargin: '0px',
+          threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('active');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, observerOptions);
+
+        const elements = document.querySelectorAll('.reveal');
+        elements.forEach(el => observer.observe(el));
+      }, []);
+
+      return (
+        <div className="min-h-screen flex flex-col font-sans text-gray-800">
+          <Header onOpenReservation={() => setIsReservationOpen(true)} />
+          <ReservationModal isOpen={isReservationOpen} onClose={() => setIsReservationOpen(false)} />
+          <main className="flex-grow">
+            <Hero onOpenReservation={() => setIsReservationOpen(true)} />
+            <About />
+            <MenuDisplay onOpenReservation={() => setIsReservationOpen(true)} />
+            <Gallery />
+            <Reviews />
+            <InfoDisplay />
+          </main>
+          <Footer />
+        </div>
+      );
+    };
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  </script>
+</body>
+</html>
